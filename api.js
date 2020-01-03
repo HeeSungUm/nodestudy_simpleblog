@@ -19,7 +19,23 @@ exports.user = {
 
 
     get_list: function(db, query, next) {
-        
+        var page = parseInt(query.page);
+        db.serialize(function () {
+            var result = {
+                page:page,
+
+            }
+            var query = "SELECT * FROM user ORDER BY created_at DESC LIMIT ?, 5";
+            var stmt = db.prepare(query);
+            stmt.all((page-1)*5, function (err, users) {
+                result.users = users;
+            });
+            query = "SELECT (COUNT(*)-1)/5+1 as max_page FROM user";
+            db.all(query, function (err, max_page) {
+                result.max_page = max_page;
+                next(err, result)
+            })
+        });
     },
 
     login: function(db, id, password, next) {
@@ -35,7 +51,7 @@ exports.user = {
 
     delete: function(db, id, next) {
         db.serialize(function(){
-            var query = "DELETE FROM user where  id=?";
+            var query = "DELETE FROM user where id=?";
             var stmt = db.prepare(query);
             stmt.run(id,  function (err) {
                 next(err);
@@ -60,7 +76,6 @@ exports.post = {
                 result.posts = posts;
             });
             query = "SELECT (COUNT(*)-1) / 5 + 1 as max_page FROM post;";
-            stmt = db.prepare(query);
             db.all(query,  function (err, query_result) {
                 if (err){
 
@@ -69,7 +84,6 @@ exports.post = {
                     next(err, result);
                 }
             });
-            stmt.finalize();
         })
     },
 
@@ -134,12 +148,21 @@ exports.post = {
 
     // body에 있는 내용으로 id 게시물 변경
     modify: function(db, id, title, content, next) {
-        
+        var query = "UPDATE post SET title=?, content = ? WHERE id=?"
+        var stmt = db.prepare(query)
+        stmt.run(title, content, id, function (err) {
+            next(err);
+        })
     },
 
     // id 게시물 삭제
     delete: function(db, id, next) {
-        
+
+        var query = "DELETE FROM post WHERE id=?";
+        var stmt = db.prepare(query);
+        stmt.run(id, function (err) {
+            next(err);
+        })
     }
 };
 
@@ -169,7 +192,10 @@ exports.comment = {
     },
 
     get_list: function(db, query, next) {
-        
+
+
+
+
     },
 };
 
