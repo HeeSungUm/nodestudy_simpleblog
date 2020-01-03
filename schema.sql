@@ -15,7 +15,7 @@ CREATE TABLE post (
     view_count INTEGER NOT NULL DEFAULT(0),
     recommend_count INTEGER NOT NULL DEFAULT(0),
     created_at DATETIME NOT NULL DEFAULT(DATETIME('now')),
-    is_deleted BOOLEAN NOT NULL DEFAULT(0)
+    is_deleted BOOLEAN NOT NULL DEFAULT(0) //일단은 안 씀
 );
 
 CREATE TABLE comment (

@@ -520,6 +520,6 @@ app.get("/admin/comment/:comment_id/delete", function(req, res) {
 });
 
 
-app.listen(3000, function() {
+app.listen(12345, function() {
     console.log("서버를 시작합니다.")
 });
