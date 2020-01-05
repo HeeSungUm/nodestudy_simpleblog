@@ -5,6 +5,7 @@
     </head>
     <body>
         <h1>(관리자) 유저 목록(<%= page %> / <%= max_page %>)</h1>
+        <br>
         <a href="/admin">돌아가기</a>
         <form method="GET" action="/admin/users">
             <input type="text" name="query">
@@ -37,6 +38,7 @@
         <% if(page < max_page){ %>
         <a href="/admin/users/<%= page + 1%>">다음 페이지</a>
         <% } %>
+
 
     </body>
 </html>

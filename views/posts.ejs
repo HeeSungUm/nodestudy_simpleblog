@@ -5,6 +5,14 @@
     </head>
     <body>
         <h1>게시물 목록(<%= page %> / <%= max_page %>)</h1>
+        <form action="/posts/1" method="get">
+            <select name="sort">
+                <option value="recommend">추천순</option>
+                <option value="comment">댓글순</option>
+                <option value="date" selected = selected>날짜순</option>
+            </select>
+            <input type="submit" value="보내기">
+        </form>
         <hr>
         <table>
             <thead>
@@ -41,17 +49,17 @@
             %>
 
             <% if(i != 0) { %>
-                <a href="/posts/<%= p %>"><%= p %></a>
+                <a href="/posts/<%=sort %>/<%= p %>"><%=p %></a>
             <% } else { %>
                 <%= p %>
             <% } %>
             &nbsp;
         <% } %><br>
         <% if(page > 1){ %>
-        <a href="/posts/<%= page - 1%>">이전 페이지</a>
+        <a href="/posts/<%=sort %>/<%= page - 1%>">이전 페이지</a>
         <% } %>
         <% if(page < max_page){ %>
-        <a href="/posts/<%= page + 1%>">다음 페이지</a>
+        <a href="/posts/<%=sort %>/<%= page + 1%>">다음 페이지</a>
         <% } %>
     </body>
 </html>

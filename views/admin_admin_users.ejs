@@ -4,8 +4,9 @@
         <title>관리자 유저 목록</title>
     </head>
     <body>
-        <h1>(관리자) 유저 목록(<%= page %> / <%= max_page %>)</h1>
+        <h1>관리자 유저 목록(<%= page %> / <%= max_page %>)</h1>
         <a href="/admin">돌아가기</a>
+        <a href="/admin/add_user/"> 관리자 계정 추가</a> <br>
         <form method="GET" action="/admin/admin_users">
             <input type="text" name="query">
             <input type="submit" value="검색">
@@ -13,7 +14,8 @@
         <hr>
         <% for(var user of users) { %>
             <%= user.id %><br>
-            <a href="/admin/admin_user/<%= user.id %>/delete">삭제하기</a> 마지막 로그인 날짜 : <%=user.last_login%>
+            <a href="/admin/admin_user/<%= user.id %>/delete">삭제하기</a>
+            <a href="/admin/password/<%= user.id %>/modify"> 비밀번호 변경</a> 마지막 로그인 날짜 : <%=user.last_login%>
             <br>
         <% } %>
 

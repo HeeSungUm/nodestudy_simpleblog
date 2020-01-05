@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>관리자계졍추가하기</title>
+</head>
+<body>
+<h1>계정추가</h1>
+<a href="/admin">뒤로가기</a>
+
+<hr>
+<% if(locals.message) { %>
+    <p><%= message || "" %></p>
+<% } %>
+<form action="/admin/admin_users" method="POST">
+    ID: <input type="text" name="id"><br>
+    PW: <input type="password" name="password"><br>
+    PW 확인: <input type="password2" name="password2"><br>
+    <input type="submit" value="계정추가">
+</form>
+</body>
+</html>

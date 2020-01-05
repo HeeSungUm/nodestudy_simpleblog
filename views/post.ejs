@@ -16,6 +16,8 @@
         <hr>
         <% for(var comment of comments) { %>
             <%= comment.user_id %>: <%= comment.content %>
+            <%%>
+            <a href="/post/<%= post.id %>/comment_recommend">댓글 추천하기</a>
             <!-- 내가 작성한 댓글이면 삭제하기 -->
             <% if(user_id == comment.user_id) { %>
                 <a href="/comment/<%= comment.id %>/delete?post_id=<%= post.id%>">댓글 삭제</a>

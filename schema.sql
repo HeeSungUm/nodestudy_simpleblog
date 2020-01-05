@@ -25,12 +25,17 @@ CREATE TABLE comment (
     post_id INTEGER NOT NULL,
     user_id VARCHAR(32) NOT NULL,
     content TEXT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT(DATETIME('now'))
+    created_at DATETIME NOT NULL DEFAULT(DATETIME('now')),
+    recommend_count INTEGER NOT NULL default (0)
 );
-
-
+alter table post add column comment_count integer NOT NULL default(0);
+create table block_ip (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip varchar (16) not null
+);
+SELECT COUNT(*) FROM comment where post_id=104;
+update post set comment_count = 2 where id=104;
+select * from post where id =104
 COMMIT;
 
-select * from post
 
-alter

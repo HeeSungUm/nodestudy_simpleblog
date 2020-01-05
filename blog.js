@@ -6,6 +6,7 @@ var db = new sqlite3.Database("./blog.db");
 var session = require('express-session');
 var url = require("url");
 var app = express();
+var request_ip = require("request-ip");
 
 // 뷰 등록 + 템플릿 엔진 등록
 app.set('views', __dirname + '/views'); // 템플릿이 있는 디렉토리
@@ -42,10 +43,11 @@ app.get("/", function(req, res) {
 // - recommend: 추천수 정렬
 // * page
 // 페이지 인덱스(1부터 시작)
-app.get("/posts/:page", function(req, res) {
+app.get("/posts/:sort/:page", function(req, res) {
     var page = req.params.page
     var query = {
         page: page,
+        sort: req.params.sort
     }
     // Sample RESULT
     // result = {
@@ -70,6 +72,10 @@ app.get("/posts/:page", function(req, res) {
         }
     }) 
 });
+app.get("/posts/:page", function(req, res) {
+    res.redirect("/posts/"+req.query.sort+"/1")
+});
+
 
 // id 게시물 가져오기
 app.get("/post/:id", function(req, res) {
@@ -321,6 +327,11 @@ app.post("/admin/login", function(req, res) {
             req.session.user_id = id;
             req.session.is_admin = true;
             res.redirect("/admin");
+            api.user.last_login(db, req.body.id, function (err) {
+                if(err){
+                    res.sendStatus(500);
+                }
+            });
         }
         else {
             res.redirect(url.format({
@@ -375,7 +386,6 @@ app.get("/admin/posts/:page", function(req, res) {
         res.sendStatus(403);
         return;
     }
-
     var page = parseInt(req.params.page);
     var query = {
         page: page
@@ -521,6 +531,109 @@ app.get("/admin/admin_users/:page", function(req, res) {
         }
     });
 });
+// 관리자 계정추가 페이지 가져오기
+app.get("/admin/add_user", function(req, res) {
+    res.render("admin_add_user.ejs", req.query);
+});
+// 관리자 계정 비밀번호 삭제하기 페이지
+app.get("/admin/password/:id/modify", function(req, res) {
+    if(!req.session.is_admin) {
+        res.sendStatus(403);
+        return;
+    }
+    api.admin.get_user(db, req.params.id, function(err, result) {
+        if(err) {
+            res.sendStatus(500);
+        }
+        else if(result) {
+            res.render("admin_password_modify.ejs", result);
+        }
+        else {
+            res.sendStatus(404);
+        }
+    });
+});
+
+// 관리자 계정 비밀번호 수정 요청
+app.post("/admin/password/:id/modify", function(req, res) {
+    if(!req.session.is_admin) {
+        res.sendStatus(403);
+        return;
+    }
+    var id = req.params.id;
+    var pw1 = req.body.password1;
+    var pw2 = req.body.password2;
+
+    // ID가 일치하는가?
+    if(pw1 === pw2) {
+        api.admin.password_modify(db, id, pw1, function(success) {
+            if(success) {
+                res.redirect(url.format({
+                    pathname: "/admin/admin_users/1",
+                    query: {
+                        message: "관리자 계정을 추가했습니다.."
+                    }
+                }));
+            }
+            else {
+                res.redirect(url.format({
+                    pathname: "/admin/admin_users/1",
+                    query: {
+                        message: "이미 존재하는 ID입니다."
+                    }
+                }));
+            }
+        });
+    }
+    else {
+        res.redirect(url.format({
+            pathname: "/admin/admin_user/1",
+            query: {
+                message: "비밀번호가 일치하지 않습니다."
+            }
+        }));
+    }
+
+});
+
+// 회원가입 요청
+app.post("/admin/admin_users", function(req, res) {
+    var body = req.body;
+    var id = body.id;
+    var pw1 = body.password;
+    var pw2 = body.password2;
+
+    // ID가 일치하는가?
+    if(pw1 === pw2) {
+        api.admin.create(db, req.body, function(success) {
+            if(success) {
+                res.redirect(url.format({
+                    pathname: "/admin/admin_users/1",
+                    query: {
+                        message: "관리자 계정을 추가했습니다.."
+                    }
+                }));
+            }
+            else {
+                res.redirect(url.format({
+                    pathname: "/admin/add_user",
+                    query: {
+                        message: "이미 존재하는 ID입니다."
+                    }
+                }));
+            }
+        });
+    }
+    else {
+        res.redirect(url.format({
+            pathname: "/admin/add_user",
+            query: {
+                message: "비밀번호가 일치하지 않습니다."
+            }
+        }));
+    }
+});
+
 
 // id 유저 삭제
 app.get("/admin/user/:id/delete", function(req, res) {
@@ -540,6 +653,7 @@ app.get("/admin/user/:id/delete", function(req, res) {
 
 // 댓글목록 보기
 app.get("/admin/comments/:page", function(req, res) {
+    console.log("asdasd");
     if(!req.session.is_admin) {
         res.sendStatus(403);
         return;
