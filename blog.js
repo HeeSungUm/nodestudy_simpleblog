@@ -205,10 +205,19 @@ app.post("/users", function(req, res) {
 // 로그인 요청
 app.post("/login", function(req, res) {
     api.user.login(db, req.body.id, req.body.password, function(err, rows){
-        if(rows.length > 0) {
-            req.session.user_id = req.body.id;
-            req.session.is_admin = false;
-            res.redirect("/");
+        if(rows.length > 0 ) {
+            if (rows[0].is_deleted === 1){
+                res.send("관리자에 의해 회원탈퇴 되었습니다.")
+            }else{
+                req.session.user_id = req.body.id;
+                req.session.is_admin = false;
+                api.user.last_login(db, req.body.id, function (err) {
+                    if(err){
+                        res.sendStatus(500);
+                    }
+                });
+                res.redirect("/");
+            }
         }
         else {
             res.redirect(url.format({
@@ -247,6 +256,32 @@ app.get("/leave", function(req, res) {
             })
         }
     });
+});
+// 게시물 작성하기
+app.get("/write", function(req, res) {
+    if(req.session.user_id ==null) {
+        res.sendStatus(403);
+        return;
+    }
+
+    res.render("write.ejs");
+});
+
+// 게시물 작성 POST 요청
+// title: 제목
+// content: 내용
+app.post("/write", function(req, res) {
+    if(req.session.user_id ==null) {
+        res.sendStatus(403);
+        return;
+    }
+
+    api.post.create(db, req.body.title, req.session.user_id, req.body.content, function(err, post_id) {
+        if(err) {
+            res.sendStatus(500);
+        } else {
+            res.redirect("/post/" + post_id);
+        }    })
 });
 
 
@@ -341,10 +376,10 @@ app.get("/admin/posts/:page", function(req, res) {
         return;
     }
 
-    var page = parseInt(req.params.page)
+    var page = parseInt(req.params.page);
     var query = {
         page: page
-    }
+    };
     // SAMPLE 
     // obj = {
     //     posts: [
@@ -450,6 +485,39 @@ app.get("/admin/users/:page", function(req, res) {
             res.sendStatus(500);
         } else {
             res.render("admin_users.ejs", result);
+        }
+    });
+});
+//관리자 계정
+app.get("/admin/admin_users/:page", function(req, res) {
+    if(!req.session.is_admin) {
+        res.sendStatus(403);
+        return;
+    }
+
+    // SAMPLE
+    // result = {
+    //     page: page,
+    //     max_page: 100,
+    //     users: [
+    //         { id: "test1" },
+    //         { id: "test2" },
+    //         { id: "test22" },
+    //         { id: "test31" },
+    //         { id: "test4" },
+    //         { id: "test5" },
+    //     ]
+    // };
+
+    var page = parseInt(req.params.page);
+    var query = {
+        page: page
+    };
+    api.user.admin_get_list(db, query, function(err, result) {
+        if(err) {
+            res.sendStatus(500);
+        } else {
+            res.render("admin_admin_users.ejs", result);
         }
     });
 });

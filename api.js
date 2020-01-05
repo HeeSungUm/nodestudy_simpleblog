@@ -1,4 +1,11 @@
 exports.user = {
+    last_login: function(db, id, next){
+        var query = "UPDATE user SET last_login = CURRENT_DATE WHERE id =?";
+        var stmt= db.prepare(query);
+        stmt.run(id, function (err) {
+            next(err);
+        });
+    },
     create: function(db, body, next) {
         db.serialize(function(){
             var id= body.id;
@@ -25,12 +32,31 @@ exports.user = {
                 page:page,
 
             }
-            var query = "SELECT * FROM user ORDER BY created_at DESC LIMIT ?, 5";
+            var query = "SELECT * FROM user WHERE is_deleted = 0 AND is_admin != 1 ORDER BY created_at DESC LIMIT ?, 5";
             var stmt = db.prepare(query);
             stmt.all((page-1)*5, function (err, users) {
                 result.users = users;
             });
-            query = "SELECT (COUNT(*)-1)/5+1 as max_page FROM user";
+            query = "SELECT (COUNT(*)-1)/5+1 as max_page FROM user WHERE is_deleted = 0 AND  is_admin != 1";
+            db.all(query, function (err, max_page) {
+                result.max_page = max_page;
+                next(err, result)
+            })
+        });
+    },
+    admin_get_list: function(db, query, next) {
+        var page = parseInt(query.page);
+        db.serialize(function () {
+            var result = {
+                page:page,
+
+            }
+            var query = "SELECT * FROM user WHERE is_deleted = 0 AND is_admin = 1 ORDER BY created_at DESC LIMIT ?, 5";
+            var stmt = db.prepare(query);
+            stmt.all((page-1)*5, function (err, users) {
+                result.users = users;
+            });
+            query = "SELECT (COUNT(*)-1)/5+1 as max_page FROM user WHERE is_deleted = 0 AND is_admin = 1";
             db.all(query, function (err, max_page) {
                 result.max_page = max_page;
                 next(err, result)
@@ -42,21 +68,35 @@ exports.user = {
         db.serialize(function(){
             const query = "SELECT * FROM user where id=? AND password=? AND is_admin=0;";
             var stmt = db.prepare(query);
-            stmt.all(id, password, function (err, result) {
+                stmt.all(id, password, function (err, result) {
                 next(err, result);
+                console.log(result)
             });
-            stmt.finalize();
         })
     },
 
     delete: function(db, id, next) {
         db.serialize(function(){
-            var query = "DELETE FROM user where id=?";
+            var query = "UPDATE user SET is_deleted=1 where id = ?";
             var stmt = db.prepare(query);
             stmt.run(id,  function (err) {
-                next(err);
+                if(err){
+                    next(err);
+
+                }
             });
-            stmt.finalize();
+            query = 'UPDATE post SET content = "관리자에 의해 삭제된 게시글 / 댓글입니다." where user_id = ?'
+            stmt=db.prepare(query);
+            stmt.all(id, function (err) {
+                if (err){
+                    next(err);
+                }
+            });
+            query = 'UPDATE comment SET content = "관리자에 의해 삭제된 게시글 / 댓글입니다." where user_id = ?'
+            stmt=db.prepare(query);
+            stmt.all(id, function (err) {
+                next(err)
+            });
         })
     }
 }
@@ -103,8 +143,7 @@ exports.post = {
                     }
                 }
 
-            })
-            stmt.finalize();
+            });
             var query = "SELECT * FROm comment WHERE post_id = ?";
             var stmt = db.prepare(query);
             stmt.all(id, function (err, comments) {
@@ -112,8 +151,6 @@ exports.post = {
                 next(err, result);
 
             });
-            stmt.finalize();
-
 
         })
     },
@@ -138,11 +175,11 @@ exports.post = {
 
 
     // body에 있는 내용으로 새로운 게시물 작성
-    create: function(db, title, content, next) {
-        var query = "INSERT INTO post (title, content) VALUES (?, ?)"
+    create: function(db, title, user_id,content, next) {
+        var query = "INSERT INTO post (title, user_id,content) VALUES (?, ? ,?)"
         var stmt = db.prepare(query)
-        stmt.run(title, content, function (err) {
-            next(err, this.lastID)
+        stmt.run(title, user_id,content, function (err) {
+                next(err, this.lastID)
         });
     },
 
@@ -175,8 +212,8 @@ exports.comment = {
             if(err){
                 res.sendStatus(500)
             }
+            next(err)
         })
-        stmt.finailze();
     },
 
     delete: function(db, user_id, comment_id, next) {
@@ -206,7 +243,7 @@ exports.admin = {
             var query = "SELECT * FROM user WHERE id=? AND password=? AND is_admin=1"
             var stmt = db.prepare(query);
             stmt.all(id, password, function (err, result) {
-                next(err, result)
+                next(err, result && result.length>0)
             });
         })
     }

@@ -6,36 +6,36 @@
     <body>
         <h1>(관리자) 유저 목록(<%= page %> / <%= max_page %>)</h1>
         <a href="/admin">돌아가기</a>
-        <form method="GET" action="/admin/users">
+        <form method="GET" action="/admin/admin_users">
             <input type="text" name="query">
             <input type="submit" value="검색">
         </form>
         <hr>
         <% for(var user of users) { %>
             <%= user.id %><br>
-            <a href="/admin/user/<%= user.id %>/delete">삭제하기</a> 마지막 로그인 날짜 : <%=user.last_login%>
+            <a href="/admin/admin_user/<%= user.id %>/delete">삭제하기</a> 마지막 로그인 날짜 : <%=user.last_login%>
             <br>
         <% } %>
-        
+
         <% for(var i=-5; i<5; i++) { %>
-            <% 
+            <%
                 var p = page + i;
                 if(p <= 0 || p > max_page)
                     continue;
             %>
 
             <% if(i != 0) { %>
-                <a href="/admin/users/<%= p %>"><%= p %></a>
+                <a href="/admin/admin_users/<%= p %>"><%= p %></a>
             <% } else { %>
                 <%= p %>
             <% } %>
             &nbsp;
         <% } %><br>
         <% if(page > 1){ %>
-        <a href="/admin/users/<%= page - 1%>">이전 페이지</a>
+        <a href="/admin/admin_users/<%= page - 1%>">이전 페이지</a>
         <% } %>
         <% if(page < max_page){ %>
-        <a href="/admin/users/<%= page + 1%>">다음 페이지</a>
+        <a href="/admin/admin_users/<%= page + 1%>">다음 페이지</a>
         <% } %>
 
     </body>
