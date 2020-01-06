@@ -33,6 +33,11 @@ create table block_ip (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ip varchar (16) not null
 );
+create table comment_recommend_users(
+    id integer primary key autoincrement,
+    comment_id integer not null ,
+    user_id varchar (32) not null
+)
 SELECT COUNT(*) FROM comment where post_id=104;
 update post set comment_count = 2 where id=104;
 select * from post where id =104
