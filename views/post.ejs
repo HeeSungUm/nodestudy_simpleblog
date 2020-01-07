@@ -8,8 +8,8 @@
         조회수: <%= post.view_count %><br>
         추천수: <%= post.recommend_count %><br>
         <%if (user_id === post.user_id) {%>
-            <a href="/post/<%= post.id %>/modify">수정하기 <br>
-            <a href="/post/<%= post.id %>/modify">삭제하기 <br>
+            <a href="/post/<%= post.id %>/modify">수정하기 </a><br>
+            <a href="/post/<%= post.id %>/modify">삭제하기 </a><br>
         <%}%>
         <hr>
         <%- post.content -%>

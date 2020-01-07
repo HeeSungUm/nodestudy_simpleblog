@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>게시물 검색</title>
+</head>
+<body>
+<h1>게시물 검색(<%= page %> / <%= max_page %>)</h1>
+<form action="/myposts/search/1" method="get">
+    <input type="text" name="word">
+    <input type="submit" value="검색">
+</form>
+<hr>
+<table>
+    <thead>
+    <tr>
+        <th>제목</th>
+        <th>조회수</th>
+        <th>추천수</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% for(var post of posts) { %>
+        <tr>
+            <td>
+                <a href="/post/<%= post.id %>">
+                    <%= post.title %>
+                </a>
+            </td>
+            <td>
+                <%= post.view_count %>
+            </td>
+            <td>
+                <%= post.recommend_count %>
+            </td>
+        </tr>
+    <% } %>
+    </tbody>
+</table>
+<hr>
+<% for(var i=-5; i<5; i++) { %>
+    <%
+        var p = page + i;
+        if(p <= 0 || p > max_page)
+            continue;
+    %>
+
+    <% if(i != 0) { %>
+    <a href="/posts/<%= p %>"><%=p %></a>
+    <% } else { %>
+        <%= p %>
+    <% } %>
+    &nbsp;
+<% } %><br>
+<% if(page > 1){ %>
+<a href="/myposts/search/<%= page - 1%>">이전 페이지</a>
+<% } %>
+<% if(page < max_page){ %>
+<a href="/myposts/search/<%= page + 1%>">다음 페이지</a>
+<% } %>
+</body>
+</html>

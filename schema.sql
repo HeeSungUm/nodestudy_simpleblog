@@ -39,8 +39,10 @@ create table comment_recommend_users(
     user_id varchar (32) not null
 );
 alter table user add column last_login datetime ;
-alter table comment_recommend_users add column post_id integer
-alter table post add column comment_count integer not null default (0)
+alter table comment_recommend_users add column post_id integer;
+alter table post add column comment_count integer not null default (0);
 COMMIT;
+
+SELECT * from post where title like ? limit ?, 5
 
 

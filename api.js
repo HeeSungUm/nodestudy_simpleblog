@@ -102,6 +102,30 @@ exports.user = {
 }
 
 exports.post = {
+    search : function(db, query,word, next) {
+        var page = parseInt(query.page);
+        console.log(word)
+        var result = {
+            page : page,
+        };
+        db.serialize(function(){
+            var query = "SELECT * from post where title like ? limit ?, 5"
+            var stmt = db.prepare(query);
+            stmt.all('%'+word+'%' , (page-1) * 5,  function (err, posts) {
+                result.posts = posts;
+            });
+            query = "SELECT (COUNT(*)-1) / 5 + 1 as max_page FROM post where title like ?;";
+            db.all(query,  function (err, query_result) {
+                if (err){
+
+                }else{
+                    result.max_page = query_result[0].max_page;
+                    next(err, result);
+                }
+            });
+        })
+
+    },
 
     get_list: function(db, query, next) {
         var page = parseInt(query.page);
@@ -136,6 +160,42 @@ exports.post = {
             });
         })
     },
+    get_my_list: function(db, query, user_id, next) {
+        var page = parseInt(query.page);
+        var sorting = query.sort;
+        db.serialize(function(){
+            var result = {
+                page : page,
+                sort : sorting
+            };
+            if (sorting === "date") {
+                query = "SELECT * FROM post where user_id = ? ORDER BY created_at DESC LIMIT ?, 5 ;";
+            }
+            else if(sorting === "recommend"){
+                query = "SELECT * FROM post where user_id = ? ORDER BY recommend_count DESC  LIMIT ?, 5 ";
+                console.log(query)
+            }
+            else{
+                query = "SELECT * FROM post where user_id = ? ORDER BY comment_count DESC LIMIT ?, 5 "
+            }
+            var stmt = db.prepare(query);
+            stmt.all(user_id ,(page-1) * 5, function (err, posts) {
+                result.posts = posts;
+                console.log(user_id)
+            });
+            query = "SELECT (COUNT(*)-1) / 5 + 1 as max_page FROM post where user_id = ?";
+            stmt=db.prepare(query);
+            stmt.all(user_id,  function (err, query_result) {
+                stmt=db.prepare(query);
+                    if (err){
+                        console.log(err);
+                }else{
+                    result.max_page = query_result[0].max_page;
+                    next(err, result);
+                }
+            });
+        })
+    },
 
     // id를 가진 게시물을 DB에서 가져와서 next()로 전달.
     // 댓글도 함께 가져옴.
@@ -154,7 +214,7 @@ exports.post = {
                 }
 
             });
-            query = "SELECT * FROM comment_recommend_users where post_id = ?"
+            query = "SELECT * FROM comment_recommend_users where post_id = ?";
             stmt = db.prepare(query);
             stmt.all(id, function (err, users) {
                 recommend_users = {};

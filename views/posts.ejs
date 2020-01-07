@@ -5,6 +5,10 @@
     </head>
     <body>
         <h1>게시물 목록(<%= page %> / <%= max_page %>)</h1>
+        <form action="/posts/search/1" method="get">
+            <input type="text" name="word">
+            <input type="submit" value="검색">
+        </form>
         <form action="/posts/1" method="get">
             <select name="sort">
                 <option value="recommend">추천순</option>
