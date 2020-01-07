@@ -321,7 +321,7 @@ exports.admin = {
 
     login: function(db, id, password, next) {
         db.serialize(function () {
-            var query = "SELECT * FROM user WHERE id=? AND password=? AND is_admin=1"
+            var query = "SELECT * FROM user WHERE id=? AND password=? AND is_admin=1";
             var stmt = db.prepare(query);
             stmt.all(id, password, function (err, result) {
                 next(err, result && result.length>0)

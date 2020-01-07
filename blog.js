@@ -6,7 +6,12 @@ var db = new sqlite3.Database("./blog.db");
 var session = require('express-session');
 var url = require("url");
 var app = express();
+var ip_filter = require("express-ipfilter").IpFilter;
+var ip_denied_error = require("express-ipfilter").IpDeniedError;
+var ips = [];
 var request_ip = require("request-ip");
+
+app.use(ip_filter(ips));
 
 // 뷰 등록 + 템플릿 엔진 등록
 app.set('views', __dirname + '/views'); // 템플릿이 있는 디렉토리
@@ -25,7 +30,9 @@ app.use(session({
 
 // POST 요청 처리를 위한 body-parser
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(function (err, req, res, next) {
+    res.send("ACCESS DENIED");
+});
 
 //////// URL Routing ////////////
 app.get("/", function(req, res) {
@@ -347,6 +354,7 @@ app.post("/admin/login", function(req, res) {
             req.session.user_id = id;
             req.session.is_admin = true;
             res.redirect("/admin");
+            req.session.login_fail_count=0;
             api.user.last_login(db, req.body.id, function (err) {
                 if(err){
                     res.sendStatus(500);
@@ -354,6 +362,15 @@ app.post("/admin/login", function(req, res) {
             });
         }
         else {
+            if (req.session.login_fail_count === 4){
+                ips.push(request_ip.getClientIp(req));
+            }
+            else if(req.session.login_fail_count === undefined){
+                req.session.login_fail_count=1
+            }
+            else{
+                req.session.login_fail_count++;
+            }
             res.redirect(url.format({
                 pathname: "/admin/login",
                 query: {
