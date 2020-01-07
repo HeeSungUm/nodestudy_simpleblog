@@ -9,15 +9,28 @@
         추천수: <%= post.recommend_count %><br>
         <hr>
         <%- post.content -%>
-        
+
         <br><br>
         <a href="/post/<%= post.id %>/recommend">이 게시물 추천하기</a>
         <h3>댓글 목록(<%= comments.length %>)</h3>
         <hr>
+        <%console.log(recommed_users)%>
         <% for(var comment of comments) { %>
             <%= comment.user_id %>: <%= comment.content %>
-
-            <a href="/post/<%= post.id %>/comment_recommend">댓글 추천하기</a>
+            <%if (locals.user_id){%>
+                <% for (var i =0; i < comments.length; i++){%>
+                    <% var recommend_user = recommed_users[i] %>
+                    <%if (recommend_user !== undefined) {%>
+                        <%if (recommend_user.comment_id == comment.id && recommend_user.user_id == user_id ){%>
+                            <a href="/post/<%= post.id %>/<%= comment.id%>/comment_recommend/cancel">추천 취소하기</a>
+                        <% recommend_users .shift()  %>
+                        <% break} %>
+                    <%}else {%>
+                        <a href="/post/<%= post.id %>/<%= comment.id%>/comment_recommend">댓글 추천하기</a>
+                        <% recommend_users .shift() %>
+                        <% break} %>
+                <% } %>
+            <% } %>
             <!-- 내가 작성한 댓글이면 삭제하기 -->
             <% if(user_id == comment.user_id) { %>
                 <a href="/comment/<%= comment.id %>/delete?post_id=<%= post.id%>">댓글 삭제</a>

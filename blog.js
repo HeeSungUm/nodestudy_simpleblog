@@ -143,6 +143,26 @@ app.get("/post/:post_id/recommend", function(req, res) {
         }
     })
 });
+//댓글 추천
+app.get("/post/:post_id/:comment_id/comment_recommend", function(req, res) {
+    api.comment.increase_recommend_count(db, req.params.post_id, req.session.user_id, req.params.comment_id,function(err) {
+        if(err) {
+            res.sendStatus(500);
+        } else {
+            res.redirect("/post/" + req.params.post_id);
+        }
+    })
+});
+//댓글 추천 해제
+app.get("/post/:post_id/:comment_id/comment_recommend/cancel", function(req, res) {
+    api.comment.decrease_recommend_count(db, req.params.post_id, req.session.user_id, req.params.comment_id,function(err) {
+        if(err) {
+            res.sendStatus(500);
+        } else {
+            res.redirect("/post/" + req.params.post_id);
+        }
+    })
+});
 
 // id 댓글 삭제
 app.get("/comment/:comment_id/delete", function(req, res) {
@@ -219,7 +239,7 @@ app.post("/login", function(req, res) {
                 req.session.is_admin = false;
                 api.user.last_login(db, req.body.id, function (err) {
                     if(err){
-                        res.sendStatus(500);
+                        //res.sendStatus(500);
                     }
                 });
                 res.redirect("/");

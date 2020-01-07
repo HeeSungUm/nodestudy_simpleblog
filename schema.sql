@@ -37,10 +37,10 @@ create table comment_recommend_users(
     id integer primary key autoincrement,
     comment_id integer not null ,
     user_id varchar (32) not null
-)
-SELECT COUNT(*) FROM comment where post_id=104;
-update post set comment_count = 2 where id=104;
-select * from post where id =104
+);
+alter table user add column last_login datetime ;
+alter table comment_recommend_users add column post_id integer
+alter table post add column comment_count integer not null default (0)
 COMMIT;
 
 

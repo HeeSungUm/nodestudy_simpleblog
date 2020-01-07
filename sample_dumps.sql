@@ -50,6 +50,10 @@ VALUES
 (104, "test2", "gggg")
 ;
 
+insert into comment_recommend_users (comment_id, user_id, post_id)
+values
+(1, "test1", "101");
+
 
 
 COMMIT;

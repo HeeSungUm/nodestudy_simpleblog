@@ -154,8 +154,15 @@ exports.post = {
                 }
 
             });
-            var query = "SELECT * FROM comment WHERE post_id = ?";
-            var stmt = db.prepare(query);
+            query = "SELECT * FROM comment_recommend_users where post_id = ?"
+            stmt = db.prepare(query);
+            stmt.all(id, function (err, users) {
+                recommend_users = {};
+                recommend_users = users;
+                result.recommed_users = recommend_users;
+            })
+            query = "SELECT * FROM comment WHERE post_id = ?";
+            stmt = db.prepare(query);
             stmt.all(id, function (err, comments) {
                 result.comments = comments;
                 next(err, result);
@@ -209,6 +216,7 @@ exports.post = {
         var stmt = db.prepare(query);
         stmt.run(id, function (err) {
             next(err);
+
         })
     }
 };
@@ -253,6 +261,34 @@ exports.comment = {
             else{
                 next(err);
             }
+        })
+    },
+    increase_recommend_count: function(db, post_id, user_id, comment_id ,next) {
+        var query = "UPDATE comment SET recommend_count = recommend_count + 1 Where post_id = ?";
+        var stmt = db.prepare(query);
+        stmt.run(post_id, function (err) {
+            if (err){
+
+            }
+        })
+        query = "INSERT INTO comment_recommend_users (comment_id, user_id, post_id) values (?, ?, ?)";
+        stmt = db.prepare(query);
+        stmt.run(comment_id, user_id, post_id, function (err) {
+            next(err);
+        })
+    },
+    decrease_recommend_count: function(db, post_id, user_id, comment_id ,next) {
+        var query = "UPDATE comment SET recommend_count = recommend_count - 1 Where post_id = ?";
+        var stmt = db.prepare(query);
+        stmt.run(post_id, function (err) {
+            if (err){
+
+            }
+        })
+        query = "DELETE FROM comment_recommend_users where comment_id =? AND user_id = ? AND post_id = ? ";
+        stmt = db.prepare(query);
+        stmt.run(comment_id, user_id, post_id, function (err) {
+            next(err);
         })
     },
 
