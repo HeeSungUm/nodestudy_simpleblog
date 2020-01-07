@@ -484,6 +484,44 @@ app.get("/admin/post/:id/delete", function(req, res) {
         }
     });
 });
+// 유저 게시물 수정하기 페이지
+app.get("/post/:id/modify", function(req, res) {
+    api.post.get(db, req.params.id, function(err, result) {
+        if(err) {
+            res.sendStatus(500);
+        }
+        else if(result) {
+            res.render("modify.ejs", result.post);
+        }
+        else {
+            res.sendStatus(404);
+        }
+    });
+});
+
+// 유저 게시물 수정 요청
+app.post("/post/:id/modify", function(req, res) {
+
+    api.post.modify(db, req.params.id, req.body.title, req.body.content, function(err) {
+        if(err) {
+            res.sendStatus(500);
+        } else {
+            res.redirect("/posts/1");
+        }
+    });
+});
+
+// 유저 게시물 삭제하기
+app.get("/post/:id/delete", function(req, res) {
+
+    api.post.delete(db, req.params.id, function(err) {
+        if(err) {
+            res.sendStatus(500);
+        } else {
+            res.redirect("/posts/1");
+        }
+    });
+});
 
 // 유저 목록
 app.get("/admin/users/:page", function(req, res) {
