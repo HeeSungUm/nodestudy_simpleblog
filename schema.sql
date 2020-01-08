@@ -41,6 +41,7 @@ create table comment_recommend_users(
 alter table user add column last_login datetime ;
 alter table comment_recommend_users add column post_id integer;
 alter table post add column comment_count integer not null default (0);
+alter table comment add column recommend_count integer not null default (0);
 COMMIT;
 
 

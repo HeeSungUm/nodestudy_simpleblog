@@ -20,7 +20,7 @@
         <hr>
         <%console.log(recommed_users)%>
         <% for(var comment of comments) { %>
-            <%= comment.user_id %>: <%= comment.content %>
+            <%= comment.user_id %>: <%= comment.content %> 추천수 : <%=comment.recommend_count%>
             <%if (locals.user_id){%>
                 <% for (var i =0; i < comments.length; i++){%>
                     <% var recommend_user = recommed_users[i] %>

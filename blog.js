@@ -197,7 +197,7 @@ app.get("/post/:id", function (req, res) {
             res.sendStatus(500);
         } else if (result.post) {
             result.user_id = req.session.user_id || null;
-            api.post.increase_view_count(db, req.params.id, function (err) {
+            api.post.increase_view_count(db, req.params.id, function (err, count) {
                 res.render("post.ejs", result);
             });
         } else {

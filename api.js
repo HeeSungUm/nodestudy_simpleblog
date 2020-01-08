@@ -332,9 +332,9 @@ exports.comment = {
         })
     },
     increase_recommend_count: function(db, post_id, user_id, comment_id ,next) {
-        var query = "UPDATE comment SET recommend_count = recommend_count + 1 Where post_id = ?";
+        var query = "UPDATE comment SET recommend_count = recommend_count + 1 Where id = ?";
         var stmt = db.prepare(query);
-        stmt.run(post_id, function (err) {
+        stmt.run(comment_id, function (err) {
             if (err){
 
             }
@@ -346,9 +346,9 @@ exports.comment = {
         })
     },
     decrease_recommend_count: function(db, post_id, user_id, comment_id ,next) {
-        var query = "UPDATE comment SET recommend_count = recommend_count - 1 Where post_id = ?";
+        var query = "UPDATE comment SET recommend_count = recommend_count - 1 Where id = ?";
         var stmt = db.prepare(query);
-        stmt.run(post_id, function (err) {
+        stmt.run(comment_id, function (err) {
             if (err){
 
             }
