@@ -104,14 +104,13 @@ exports.user = {
 exports.post = {
     search : function(db, query,word, next) {
         var page = parseInt(query.page);
-        console.log(word)
         var result = {
             page : page,
         };
         db.serialize(function(){
-            var query = "SELECT * from post where title like ? limit ?, 5"
+            var query = "SELECT * from post where title like ? or content like ? limit ?, 5"
             var stmt = db.prepare(query);
-            stmt.all('%'+word+'%' , (page-1) * 5,  function (err, posts) {
+            stmt.all('%'+word+'%' , '%'+word+'%', (page-1) * 5,  function (err, posts) {
                 result.posts = posts;
             });
             query = "SELECT (COUNT(*)-1) / 5 + 1 as max_page FROM post where title like ?;";
@@ -195,6 +194,15 @@ exports.post = {
                 }
             });
         })
+    },
+    comment_search: function(db, word, next) {
+        query = "SELECT * FROM comment where content like ?";
+        stmt = db.prepare(query);
+        stmt.all("%"+word+"%", function (err, comments) {
+            result.comments = comments;
+            next(err, result);
+
+        });
     },
 
     // id를 가진 게시물을 DB에서 가져와서 next()로 전달.

@@ -43,6 +43,4 @@ alter table comment_recommend_users add column post_id integer;
 alter table post add column comment_count integer not null default (0);
 COMMIT;
 
-SELECT * from post where title like ? limit ?, 5
-
 
